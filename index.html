@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+  ============================================================
+  BUILD: 2026-11-01 19:47:06 (local)
+  ------------------------------------------------------------
+  MAINTENANCE RULE — READ BEFORE EDITING THIS FILE:
+  Whenever the code in this file is modified in any way,
+  update the BUILD line above to the current date and time,
+  in the exact same format:  YYYY-MM-DD HH:MM:SS
+  Do not add or remove anything else on that line.
+  ============================================================
+-->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -42,7 +53,7 @@
     input[type="number"] {
       width: 100%;
       padding: 0.75rem;
-      font-size: 16px; /* prevents iOS zoom */
+      font-size: 16px;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
       background: white;
@@ -51,56 +62,22 @@
     }
     input:focus { outline: 2px solid #93c5fd; outline-offset: 1px; border-color: #2563eb; }
 
-    .modes {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
+    .modes { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
     .mode {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      display: flex; align-items: center; gap: 0.6rem;
       padding: 0.75rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.95rem;
-      user-select: none;
+      border: 1px solid #cbd5e1; border-radius: 10px;
+      cursor: pointer; font-size: 0.95rem; user-select: none;
     }
-    .mode:has(input:checked) {
-      border-color: #2563eb;
-      background: #eff6ff;
-    }
-    .mode input[type="radio"] {
-      width: 18px;
-      height: 18px;
-      accent-color: #2563eb;
-      flex-shrink: 0;
-    }
-    .mode .inline {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-left: auto;
-    }
-    .mode .inline input[type="number"] {
-      width: 4.5rem;
-      padding: 0.35rem 0.5rem;
-      text-align: center;
-    }
+    .mode:has(input:checked) { border-color: #2563eb; background: #eff6ff; }
+    .mode input[type="radio"] { width: 18px; height: 18px; accent-color: #2563eb; flex-shrink: 0; }
+    .mode .inline { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }
+    .mode .inline input[type="number"] { width: 4.5rem; padding: 0.35rem 0.5rem; text-align: center; }
 
     button {
-      margin-top: 1.25rem;
-      width: 100%;
-      padding: 0.85rem;
-      font-size: 1rem;
-      font-weight: 600;
-      color: white;
-      background: #2563eb;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
+      margin-top: 1.25rem; width: 100%; padding: 0.85rem;
+      font-size: 1rem; font-weight: 600; color: white;
+      background: #2563eb; border: none; border-radius: 10px; cursor: pointer;
     }
     button:active { background: #1d4ed8; }
 
@@ -108,35 +85,19 @@
     .status { margin-top: 0.75rem; font-size: 0.9rem; color: #b91c1c; }
     .hidden { display: none !important; }
 
-    /* Holding / countdown view */
     .hold { text-align: center; padding: 0.5rem 0; }
     .countdown {
-      font-size: 2.25rem;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-      color: #2563eb;
-      margin: 0.25rem 0;
+      font-size: 2.25rem; font-weight: 700; font-variant-numeric: tabular-nums;
+      color: #2563eb; margin: 0.25rem 0;
     }
-    .hold .when {
-      font-size: 0.9rem;
-      color: #4b5563;
-      margin: 0.25rem 0 1rem;
-    }
+    .hold .when { font-size: 0.9rem; color: #4b5563; margin: 0.25rem 0 1rem; }
     .hold .target {
-      font-size: 0.8rem;
-      color: #6b7280;
-      word-break: break-all;
-      margin-bottom: 1rem;
+      font-size: 0.8rem; color: #6b7280; word-break: break-all; margin-bottom: 1rem;
     }
     .hold a {
-      display: inline-block;
-      padding: 0.7rem 1.1rem;
-      background: #eff6ff;
-      color: #2563eb;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
+      display: inline-block; padding: 0.7rem 1.1rem;
+      background: #eff6ff; color: #2563eb; border-radius: 10px;
+      text-decoration: none; font-weight: 600; font-size: 0.95rem;
     }
   </style>
 </head>
@@ -184,15 +145,13 @@
 
   <script>
     (function () {
-      const params   = new URLSearchParams(location.search);
-      const rawUrl   = params.get("url");
-      const rawDate  = params.get("date");    // "YYYY-MM-DDTHH:mm"
-      const rawDelay = params.get("delay");   // minutes
+      const params  = new URLSearchParams(location.search);
+      const rawUrl  = params.get("url");
+      const rawDate = params.get("date");   // absolute local datetime: "YYYY-MM-DDTHH:mm:ss"
 
-      const card     = document.getElementById("card");
+      const form     = document.getElementById("form");
       const titleEl  = document.getElementById("title");
       const subEl    = document.getElementById("sub");
-      const form     = document.getElementById("form");
       const urlIn    = document.getElementById("url");
       const minIn    = document.getElementById("minutes");
       const dtIn     = document.getElementById("datetime");
@@ -203,12 +162,12 @@
       const whenEl   = document.getElementById("when");
       const targetEl = document.getElementById("targetLabel");
       const openNow  = document.getElementById("openNow");
-
       const modeRadios = document.querySelectorAll('input[name="mode"]');
 
       const pad = n => String(n).padStart(2, "0");
-      const toLocalInput = d =>
-        `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      const toLocalStamp = d =>
+        `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}` +
+        `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
       const fmt = d => d.toLocaleString(undefined, {
         year: "numeric", month: "numeric", day: "numeric",
         hour: "numeric", minute: "2-digit", second: "2-digit"
@@ -224,24 +183,16 @@
 
         if (target) {
           let redirectAt = null;
-
-          if (rawDelay !== null && rawDelay !== "") {
-            const mins = Number(rawDelay);
-            if (Number.isFinite(mins) && mins >= 0) {
-              redirectAt = new Date(Date.now() + mins * 60 * 1000);
-            }
-          } else if (rawDate) {
+          if (rawDate) {
             const parsed = new Date(rawDate);
             if (!isNaN(parsed.getTime())) redirectAt = parsed;
           }
 
-          // Immediate redirect (no timing, or time already passed)
           if (!redirectAt || Date.now() >= redirectAt.getTime()) {
             location.replace(target);
             return;
           }
 
-          // Holding view with live countdown
           form.classList.add("hidden");
           subEl.classList.add("hidden");
           titleEl.textContent = "Shortcut ready";
@@ -251,16 +202,12 @@
 
           const tick = () => {
             const ms = redirectAt.getTime() - Date.now();
-            if (ms <= 0) {
-              location.replace(target);
-              return;
-            }
+            if (ms <= 0) { location.replace(target); return; }
             const s = Math.floor(ms / 1000);
             const h = Math.floor(s / 3600);
             const m = Math.floor((s % 3600) / 60);
             const sec = s % 60;
-            countEl.textContent =
-              (h > 0 ? h + ":" + pad(m) : m) + ":" + pad(sec);
+            countEl.textContent = (h > 0 ? h + ":" + pad(m) : m) + ":" + pad(sec);
             whenEl.textContent = "Redirect activates on " + fmt(redirectAt);
           };
           tick();
@@ -270,10 +217,9 @@
       }
 
       // ---- Setup mode ----
-      // Default datetime = now + 1 minute
       const now = new Date();
       now.setSeconds(0, 0);
-      dtIn.value = toLocalInput(new Date(now.getTime() + 60 * 1000));
+      dtIn.value = toLocalStamp(new Date(now.getTime() + 60 * 1000)).slice(0, 16);
 
       const syncModeUI = () => {
         const mode = document.querySelector('input[name="mode"]:checked').value;
@@ -303,9 +249,7 @@
         }
 
         const mode = document.querySelector('input[name="mode"]:checked').value;
-        const out = new URL(location.href);
-        out.search = "";
-        out.searchParams.set("url", target);
+        let redirectAt;
 
         if (mode === "delay") {
           const mins = Number(minIn.value);
@@ -313,15 +257,23 @@
             status.textContent = "Minutes must be 0 or more.";
             return;
           }
-          out.searchParams.set("delay", String(mins));
+          redirectAt = new Date(Date.now() + mins * 60 * 1000);
         } else {
           if (!dtIn.value) {
             status.textContent = "Pick a date and time.";
             return;
           }
-          out.searchParams.set("date", dtIn.value);
+          redirectAt = new Date(dtIn.value);
+          if (isNaN(redirectAt.getTime())) {
+            status.textContent = "Invalid date/time.";
+            return;
+          }
         }
 
+        const out = new URL(location.href);
+        out.search = "";
+        out.searchParams.set("url", target);
+        out.searchParams.set("date", toLocalStamp(redirectAt));
         location.href = out.toString();
       });
     })();
