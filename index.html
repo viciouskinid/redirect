@@ -6,9 +6,11 @@
   ------------------------------------------------------------
   MAINTENANCE RULE — READ BEFORE EDITING THIS FILE:
   Whenever the code in this file is modified in any way,
-  update the BUILD line above to the current date and time,
-  in the exact same format:  YYYY-MM-DD HH:MM:SS
-  Do not add or remove anything else on that line.
+  update the BUILD line above AND the matching build text
+  in the page footer (search for "BUILD-FOOTER") to the
+  current date and time, in the exact same format:
+      YYYY-MM-DD HH:MM:SS
+  Do not add or remove anything else on those lines.
   ============================================================
 -->
 <head>
@@ -99,6 +101,14 @@
       background: #eff6ff; color: #2563eb; border-radius: 10px;
       text-decoration: none; font-weight: 600; font-size: 0.95rem;
     }
+
+    .build-footer {
+      margin: 1rem 0 0;
+      font-size: 0.72rem;
+      color: #9ca3af;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
   </style>
 </head>
 <body>
@@ -141,6 +151,8 @@
       <p class="target" id="targetLabel">—</p>
       <a id="openNow" href="#">Open now</a>
     </div>
+
+    <p class="build-footer">Build: 2026-11-01 19:47:06</p> <!-- BUILD-FOOTER -->
   </div>
 
   <script>
