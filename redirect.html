@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2563eb">
+  <title>Tactiq</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      background: #f8fafc;
+      color: #1f2937;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: max(1rem, env(safe-area-inset-top)) 1rem max(1rem, env(safe-area-inset-bottom));
+    }
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: white;
+      padding: 1.25rem;
+      border-radius: 16px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    h1 { font-size: 1.15rem; margin: 0 0 0.25rem; }
+    .sub { font-size: 0.85rem; color: #6b7280; margin: 0 0 1rem; }
+
+    label.field-label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin: 1.1rem 0 0.35rem;
+    }
+    input[type="url"],
+    input[type="datetime-local"],
+    input[type="number"] {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 16px; /* prevents iOS zoom */
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      background: white;
+      color: inherit;
+      appearance: none;
+    }
+    input:focus { outline: 2px solid #93c5fd; outline-offset: 1px; border-color: #2563eb; }
+
+    .modes {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .mode {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.75rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      user-select: none;
+    }
+    .mode:has(input:checked) {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+    .mode input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+    }
+    .mode .inline {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-left: auto;
+    }
+    .mode .inline input[type="number"] {
+      width: 4.5rem;
+      padding: 0.35rem 0.5rem;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 1.25rem;
+      width: 100%;
+      padding: 0.85rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      background: #2563eb;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:active { background: #1d4ed8; }
+
+    .hint { font-size: 0.8rem; color: #6b7280; margin-top: 0.35rem; }
+    .status { margin-top: 0.75rem; font-size: 0.9rem; color: #b91c1c; }
+    .hidden { display: none !important; }
+
+    /* Holding / countdown view */
+    .hold { text-align: center; padding: 0.5rem 0; }
+    .countdown {
+      font-size: 2.25rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: #2563eb;
+      margin: 0.25rem 0;
+    }
+    .hold .when {
+      font-size: 0.9rem;
+      color: #4b5563;
+      margin: 0.25rem 0 1rem;
+    }
+    .hold .target {
+      font-size: 0.8rem;
+      color: #6b7280;
+      word-break: break-all;
+      margin-bottom: 1rem;
+    }
+    .hold a {
+      display: inline-block;
+      padding: 0.7rem 1.1rem;
+      background: #eff6ff;
+      color: #2563eb;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <h1 id="title">Redirect setup</h1>
+    <p class="sub" id="sub">Choose where the shortcut goes and when it activates.</p>
+
+    <form id="form" novalidate>
+      <label class="field-label" for="url">Target URL</label>
+      <input id="url" type="url" inputmode="url" placeholder="https://example.com/page" autocomplete="off" required>
+
+      <label class="field-label">Redirect timing</label>
+      <div class="modes">
+        <label class="mode">
+          <input type="radio" name="mode" value="delay" checked>
+          From now
+          <span class="inline">
+            <input id="minutes" type="number" min="0" step="1" value="1" aria-label="Minutes from now"> min
+          </span>
+        </label>
+        <label class="mode">
+          <input type="radio" name="mode" value="datetime">
+          On a date
+        </label>
+      </div>
+
+      <div id="datetimeWrap" class="hidden">
+        <label class="field-label" for="datetime">Date and time</label>
+        <input id="datetime" type="datetime-local">
+      </div>
+
+      <button type="submit">Create link</button>
+      <p id="status" class="status" role="alert"></p>
+    </form>
+
+    <div id="hold" class="hold hidden">
+      <p style="margin:0;font-weight:600;">Shortcut ready</p>
+      <div class="countdown" id="countdown">—</div>
+      <p class="when" id="when">—</p>
+      <p class="target" id="targetLabel">—</p>
+      <a id="openNow" href="#">Open now</a>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const params   = new URLSearchParams(location.search);
+      const rawUrl   = params.get("url");
+      const rawDate  = params.get("date");    // "YYYY-MM-DDTHH:mm"
+      const rawDelay = params.get("delay");   // minutes
+
+      const card     = document.getElementById("card");
+      const titleEl  = document.getElementById("title");
+      const subEl    = document.getElementById("sub");
+      const form     = document.getElementById("form");
+      const urlIn    = document.getElementById("url");
+      const minIn    = document.getElementById("minutes");
+      const dtIn     = document.getElementById("datetime");
+      const dtWrap   = document.getElementById("datetimeWrap");
+      const status   = document.getElementById("status");
+      const holdEl   = document.getElementById("hold");
+      const countEl  = document.getElementById("countdown");
+      const whenEl   = document.getElementById("when");
+      const targetEl = document.getElementById("targetLabel");
+      const openNow  = document.getElementById("openNow");
+
+      const modeRadios = document.querySelectorAll('input[name="mode"]');
+
+      const pad = n => String(n).padStart(2, "0");
+      const toLocalInput = d =>
+        `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+      const fmt = d => d.toLocaleString(undefined, {
+        year: "numeric", month: "numeric", day: "numeric",
+        hour: "numeric", minute: "2-digit", second: "2-digit"
+      });
+
+      // ---- Redirect mode ----
+      if (rawUrl) {
+        let target = null;
+        try {
+          const u = new URL(rawUrl);
+          if (u.protocol === "http:" || u.protocol === "https:") target = u.href;
+        } catch (_) {}
+
+        if (target) {
+          let redirectAt = null;
+
+          if (rawDelay !== null && rawDelay !== "") {
+            const mins = Number(rawDelay);
+            if (Number.isFinite(mins) && mins >= 0) {
+              redirectAt = new Date(Date.now() + mins * 60 * 1000);
+            }
+          } else if (rawDate) {
+            const parsed = new Date(rawDate);
+            if (!isNaN(parsed.getTime())) redirectAt = parsed;
+          }
+
+          // Immediate redirect (no timing, or time already passed)
+          if (!redirectAt || Date.now() >= redirectAt.getTime()) {
+            location.replace(target);
+            return;
+          }
+
+          // Holding view with live countdown
+          form.classList.add("hidden");
+          subEl.classList.add("hidden");
+          titleEl.textContent = "Shortcut ready";
+          holdEl.classList.remove("hidden");
+          targetEl.textContent = target;
+          openNow.href = target;
+
+          const tick = () => {
+            const ms = redirectAt.getTime() - Date.now();
+            if (ms <= 0) {
+              location.replace(target);
+              return;
+            }
+            const s = Math.floor(ms / 1000);
+            const h = Math.floor(s / 3600);
+            const m = Math.floor((s % 3600) / 60);
+            const sec = s % 60;
+            countEl.textContent =
+              (h > 0 ? h + ":" + pad(m) : m) + ":" + pad(sec);
+            whenEl.textContent = "Redirect activates on " + fmt(redirectAt);
+          };
+          tick();
+          setInterval(tick, 1000);
+          return;
+        }
+      }
+
+      // ---- Setup mode ----
+      // Default datetime = now + 1 minute
+      const now = new Date();
+      now.setSeconds(0, 0);
+      dtIn.value = toLocalInput(new Date(now.getTime() + 60 * 1000));
+
+      const syncModeUI = () => {
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        if (mode === "delay") {
+          dtWrap.classList.add("hidden");
+          minIn.disabled = false;
+        } else {
+          dtWrap.classList.remove("hidden");
+          minIn.disabled = true;
+        }
+      };
+      modeRadios.forEach(r => r.addEventListener("change", syncModeUI));
+      syncModeUI();
+
+      form.addEventListener("submit", e => {
+        e.preventDefault();
+        status.textContent = "";
+
+        const target = urlIn.value.trim();
+        try {
+          const u = new URL(target);
+          if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error();
+        } catch (_) {
+          status.textContent = "Please enter a valid http(s) URL.";
+          urlIn.focus();
+          return;
+        }
+
+        const mode = document.querySelector('input[name="mode"]:checked').value;
+        const out = new URL(location.href);
+        out.search = "";
+        out.searchParams.set("url", target);
+
+        if (mode === "delay") {
+          const mins = Number(minIn.value);
+          if (!Number.isFinite(mins) || mins < 0) {
+            status.textContent = "Minutes must be 0 or more.";
+            return;
+          }
+          out.searchParams.set("delay", String(mins));
+        } else {
+          if (!dtIn.value) {
+            status.textContent = "Pick a date and time.";
+            return;
+          }
+          out.searchParams.set("date", dtIn.value);
+        }
+
+        location.href = out.toString();
+      });
+    })();
+  </script>
+</body>
+</html>
